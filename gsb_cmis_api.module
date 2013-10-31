@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Contains functions for GSB CMIS API
+ */
+
+function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
+
+  module_load_include('api.inc', 'cmis');
+
+  // pull out the object id from the uuid
+
+  $uuid_parts = explode(':', $uuid);
+
+  if (count($uuid_parts) == 3 && $uuid_parts[0] == 'urn' && $uuid_parts[1] == 'uuid') {
+    $object_id = $uuid_parts[2];
+  } else {
+    return '';
+  }
+
+  // get the cmis settings for the give repository
+
+  $cmis_repositories = variable_get('cmis_repositories', null);
+  $settings = $cmis_repositories[$repository_name];  
+
+  $object_id = 'workspace://SpacesStore/' . $object_id;
+
+  // get the repository and object properties
+
+  $repository = cmis_get_repository($repository_name);
+  $object = cmisapi_getProperties($repository->repositoryId, $object_id);
+
+  // form the url using the returned object id
+
+  $id = $object->properties['cmis:objectId'];
+  $url = str_replace('workspace://', $settings['workspace'], $id);
+
+  return $url;
+
+}
+
+
+
+

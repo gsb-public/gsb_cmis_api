@@ -1,0 +1,8 @@
+name = GSB CMIS Api
+description = A module to provide an API to CMIS
+core = 7.x
+package = GSB
+dependencies[] = cmis
+dependencies[] = cmis_common
+
+
