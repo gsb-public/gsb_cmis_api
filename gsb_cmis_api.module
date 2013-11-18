@@ -19,7 +19,7 @@ function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
     return '';
   }
 
-  // get the cmis settings for the give repository
+  // get the cmis settings for the repository
 
   $cmis_repositories = variable_get('cmis_repositories', null);
   $settings = $cmis_repositories[$repository_name];  
@@ -30,6 +30,7 @@ function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
 
   $repository = cmis_get_repository($repository_name);
   $object = cmisapi_getProperties($repository->repositoryId, $object_id);
+  dpm($object);
 
   // form the url using the returned object id
 
@@ -40,6 +41,55 @@ function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
 
 }
 
+function gsb_cmis_api_getDocuments($repository_name, $uuid) {
 
+  module_load_include('api.inc', 'cmis');
 
+  // pull out the object id from the uuid
+
+  $uuid_parts = explode(':', $uuid);
+
+  if (count($uuid_parts) == 3 && $uuid_parts[0] == 'urn' && $uuid_parts[1] == 'uuid') {
+    $object_id = $uuid_parts[2];
+  } else {
+    return '';
+  }
+
+  // get the cmis settings for the repository
+
+  $cmis_repositories = variable_get('cmis_repositories', null);
+  $settings = $cmis_repositories[$repository_name];
+
+  $object_id = 'workspace://SpacesStore/' . $object_id;
+
+  // get the repository and object properties
+
+  $repository = cmis_get_repository($repository_name);
+
+  $objects = _gsb_cmis_api_getDocumentObjects($repository, $object_id);
+
+  return $objects;
+  
+}
+
+function _gsb_cmis_api_getDocumentObjects($repository, $object_id) {
+
+  $doc_objects = array();
+
+  $children = cmisapi_getChildren($repository->repositoryId, $object_id);
+
+  $object_list = $children->objectList;
+  foreach($object_list as $key => $value) {
+    $obj_type = $value->properties['cmis:objectTypeId'];
+    if ($obj_type == 'cmis:folder') {
+      $objects = _gsb_cmis_api_getDocumentObjects($repository, $value->id);
+      $doc_objects = array_merge($objects, $doc_objects);
+    } else {
+      $doc_objects[] = $value;
+    }
+  }
+
+  return $doc_objects;
+
+}
 
