@@ -5,26 +5,15 @@
  * Contains functions for GSB CMIS API
  */
 
-function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
+function gsb_cmis_api_getDocumentObject($repository_name, $uuid) {
 
   module_load_include('api.inc', 'cmis');
 
   // pull out the object id from the uuid
-
-  $uuid_parts = explode(':', $uuid);
-
-  if (count($uuid_parts) == 3 && $uuid_parts[0] == 'urn' && $uuid_parts[1] == 'uuid') {
-    $object_id = $uuid_parts[2];
-  } else {
-    return '';
+  $object_id = _gsb_cmis_api_get_object_id($uuid);
+  if (empty($object_id)) {
+    return;
   }
-
-  // get the cmis settings for the repository
-
-  $cmis_repositories = variable_get('cmis_repositories', null);
-  $settings = $cmis_repositories[$repository_name];  
-
-  $object_id = 'workspace://SpacesStore/' . $object_id;
 
   // get the repository and object properties
 
@@ -32,13 +21,7 @@ function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
   $object = cmisapi_getProperties($repository->repositoryId, $object_id);
   dpm($object);
 
-  // form the url using the returned object id
-
-  $id = $object->properties['cmis:objectId'];
-  $url = str_replace('workspace://', $settings['workspace'], $id);
-
-  return $url;
-
+  return $object;
 }
 
 function gsb_cmis_api_getDocuments($repository_name, $uuid) {
@@ -46,30 +29,16 @@ function gsb_cmis_api_getDocuments($repository_name, $uuid) {
   module_load_include('api.inc', 'cmis');
 
   // pull out the object id from the uuid
-
-  $uuid_parts = explode(':', $uuid);
-
-  if (count($uuid_parts) == 3 && $uuid_parts[0] == 'urn' && $uuid_parts[1] == 'uuid') {
-    $object_id = $uuid_parts[2];
-  } else {
-    return '';
+  $object_id = gsb_cmis_api_get_object_id($uuid);
+  if (empty($object_id)) {
+    return;
   }
 
-  // get the cmis settings for the repository
-
-  $cmis_repositories = variable_get('cmis_repositories', null);
-  $settings = $cmis_repositories[$repository_name];
-
-  $object_id = 'workspace://SpacesStore/' . $object_id;
-
   // get the repository and object properties
-
   $repository = cmis_get_repository($repository_name);
-
   $objects = _gsb_cmis_api_getDocumentObjects($repository, $object_id);
 
   return $objects;
-  
 }
 
 function _gsb_cmis_api_getDocumentObjects($repository, $object_id) {
@@ -90,6 +59,53 @@ function _gsb_cmis_api_getDocumentObjects($repository, $object_id) {
   }
 
   return $doc_objects;
+}
+
+function gsb_cmis_api_getDocumentURL($repository_name, $uuid) {
+
+  module_load_include('api.inc', 'cmis');
+
+  $object = gsb_cmis_api_getDocumentObject($repository_name, $uuid);
+
+  // form the url using the returned object
+  $url = gsb_cmis_api_getObjectURL($repository_name, $object);
+
+  return $url;
 
 }
+
+function gsb_cmis_api_getObjectURL($repository_name, $object) {
+
+  // get the cmis settings for the repository
+  $cmis_repositories = variable_get('cmis_repositories', null);
+  $settings = $cmis_repositories[$repository_name];
+
+  // form the url using the returned object id
+  $id = $object->properties['cmis:objectId'];
+  $url = str_replace('workspace://', $settings['workspace'], $id);
+
+  return $url;
+
+}
+
+function _gsb_cmis_api_get_object_id($uuid) {
+
+  module_load_include('api.inc', 'cmis');
+
+  // pull out the object id from the uuid
+
+  $uuid_parts = explode(':', $uuid);
+
+  if (count($uuid_parts) == 3 && $uuid_parts[0] == 'urn' && $uuid_parts[1] == 'uuid') {
+    $object_id = $uuid_parts[2];
+  } else {
+    return '';
+  }
+
+  $object_id = 'workspace://SpacesStore/' . $object_id;
+
+  return $object_id;
+}
+
+
 

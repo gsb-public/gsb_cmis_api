@@ -6,3 +6,10 @@ dependencies[] = cmis
 dependencies[] = cmis_common
 
 
+
+
+; Information added by drush on 2013-11-20
+version = "WP-2361-dev"
+project = "gsb_cmis_api"
+datestamp = "1384995242"
+
