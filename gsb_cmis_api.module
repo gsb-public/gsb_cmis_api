@@ -36,12 +36,12 @@ function gsb_cmis_api_getDocuments($repository_name, $uuid) {
 
   // get the repository and object properties
   $repository = cmis_get_repository($repository_name);
-  $objects = _gsb_cmis_api_getDocumentObjects($repository, $object_id);
+  $objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
 
   return $objects;
 }
 
-function _gsb_cmis_api_getDocumentObjects($repository, $object_id) {
+function _gsb_cmis_api_getChildObjects($repository, $object_id) {
 
   $doc_objects = array();
 
@@ -51,7 +51,7 @@ function _gsb_cmis_api_getDocumentObjects($repository, $object_id) {
   foreach($object_list as $key => $value) {
     $obj_type = $value->properties['cmis:objectTypeId'];
     if ($obj_type == 'cmis:folder') {
-      $objects = _gsb_cmis_api_getDocumentObjects($repository, $value->id);
+      $objects = _gsb_cmis_api_getChildObjects($repository, $value->id);
       $doc_objects = array_merge($objects, $doc_objects);
     } else {
       $doc_objects[] = $value;
