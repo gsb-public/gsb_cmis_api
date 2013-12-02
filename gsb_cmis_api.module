@@ -29,7 +29,7 @@ function gsb_cmis_api_getDocuments($repository_name, $uuid) {
   module_load_include('api.inc', 'cmis');
 
   // pull out the object id from the uuid
-  $object_id = gsb_cmis_api_get_object_id($uuid);
+  $object_id = _gsb_cmis_api_get_object_id($uuid);
   if (empty($object_id)) {
     return;
   }

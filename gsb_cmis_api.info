@@ -13,3 +13,10 @@ version = "WP-2361-dev"
 project = "gsb_cmis_api"
 datestamp = "1384995242"
 
+
+
+; Information added by drush on 2013-12-02
+version = "WP-2361-dev"
+project = "gsb_cmis_api"
+datestamp = "1386012805"
+
