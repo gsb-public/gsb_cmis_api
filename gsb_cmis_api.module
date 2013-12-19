@@ -19,7 +19,7 @@ function gsb_cmis_api_getDocumentObject($repository_name, $uuid) {
 
   $repository = cmis_get_repository($repository_name);
   $object = cmisapi_getProperties($repository->repositoryId, $object_id);
-  dpm($object);
+  //dpm($object);
 
   return $object;
 }
