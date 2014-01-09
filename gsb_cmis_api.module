@@ -35,7 +35,7 @@ function gsb_cmis_api_getTopLevelFolders($repository_name, $uuid) {
   }
 
   // get the repository and object properties
-  dpm('Repository name = '. $repository_name);
+  //dpm('Repository name = '. $repository_name);
   $repository = cmis_get_repository($repository_name);
   //$objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
   $objects = _gsb_cmis_api_getTopLevelFolderObjects($repository, $object_id);
@@ -54,7 +54,7 @@ function _gsb_cmis_api_getTopLevelObjects($repository_name, $uuid) {
   }
 
   // get the repository and object properties
-  dpm('Repository name = '. $repository_name);
+  //dpm('Repository name = '. $repository_name);
   $repository = cmis_get_repository($repository_name);
   //$objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
   $objects = _gsb_cmis_api_getTopLevelNonFolderObjects($repository, $object_id);
