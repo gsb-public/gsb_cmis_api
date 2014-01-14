@@ -15,51 +15,12 @@ function gsb_cmis_api_getDocumentObject($repository_name, $uuid) {
     return;
   }
 
-  // get the repository and object properties
-
+  // get the repository and object's properties
   $repository = cmis_get_repository($repository_name);
   $object = cmisapi_getProperties($repository->repositoryId, $object_id);
-  //dpm($object);
 
   return $object;
-}
 
-function gsb_cmis_api_getTopLevelFolders($repository_name, $uuid) {
-
-  module_load_include('api.inc', 'cmis');
-
-  // pull out the object id from the uuid
-  $object_id = _gsb_cmis_api_get_object_id($uuid);
-  if (empty($object_id)) {
-    return;
-  }
-
-  // get the repository and object properties
-  //dpm('Repository name = '. $repository_name);
-  $repository = cmis_get_repository($repository_name);
-  //$objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
-  $objects = _gsb_cmis_api_getTopLevelFolderObjects($repository, $object_id);
-
-  return $objects;
-}
-
-function _gsb_cmis_api_getTopLevelObjects($repository_name, $uuid) {
-
-  module_load_include('api.inc', 'cmis');
-
-  // pull out the object id from the uuid
-  $object_id = _gsb_cmis_api_get_object_id($uuid);
-  if (empty($object_id)) {
-    return;
-  }
-
-  // get the repository and object properties
-  //dpm('Repository name = '. $repository_name);
-  $repository = cmis_get_repository($repository_name);
-  //$objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
-  $objects = _gsb_cmis_api_getTopLevelNonFolderObjects($repository, $object_id);
-
-  return $objects;
 }
 
 function gsb_cmis_api_getDocuments($repository_name, $uuid) {
@@ -72,49 +33,11 @@ function gsb_cmis_api_getDocuments($repository_name, $uuid) {
     return;
   }
 
-  // get the repository and object properties
-  drush_log(dt('Repository name = '. $repository_name), 'success'); 
+  // get the repository and the child object properties
   $repository = cmis_get_repository($repository_name);
   $objects = _gsb_cmis_api_getChildObjects($repository, $object_id);
 
   return $objects;
-}
-
-function _gsb_cmis_api_getTopLevelFolderObjects($repository, $object_id) {
-
-  $doc_objects = array();
-
-  $children = cmisapi_getChildren($repository->repositoryId, $object_id);
-
-  $object_list = $children->objectList;
-
-  foreach($object_list as $key => $value) {
-    $obj_type = $value->properties['cmis:objectTypeId'];
-    if ($obj_type == 'cmis:folder') {
-      $doc_objects[] = $value;
-    }
-    //$doc_objects[] = $value;
-  }
-
-  return $doc_objects;
-}
-
-function _gsb_cmis_api_getTopLevelNonFolderObjects($repository, $object_id) {
-
-  $doc_objects = array();
-
-  $children = cmisapi_getChildren($repository->repositoryId, $object_id);
-
-  $object_list = $children->objectList;
-
-  foreach($object_list as $key => $value) {
-    $obj_type = $value->properties['cmis:objectTypeId'];
-    if ($obj_type != 'cmis:folder') {
-      $doc_objects[] = $value;      
-    }
-  }
-
-  return $doc_objects;
 }
 
 function _gsb_cmis_api_getChildObjects($repository, $object_id) {
@@ -132,6 +55,76 @@ function _gsb_cmis_api_getChildObjects($repository, $object_id) {
       $doc_objects = array_merge($objects, $doc_objects);
     } else {
       $doc_objects[] = $value;
+    }
+  }
+
+  return $doc_objects;
+}
+
+function gsb_cmis_api_getTopLevelFolders($repository_name, $uuid) {
+
+  module_load_include('api.inc', 'cmis');
+
+  // pull out the object id from the uuid
+  $object_id = _gsb_cmis_api_get_object_id($uuid);
+  if (empty($object_id)) {
+    return;
+  }
+
+  // get the repository and the top level folder objects 
+  $repository = cmis_get_repository($repository_name);
+  $objects = _gsb_cmis_api_getTopLevelFolderObjects($repository, $object_id);
+
+  return $objects;
+}
+
+function _gsb_cmis_api_getTopLevelFolderObjects($repository, $object_id) {
+
+  $doc_objects = array();
+
+  $children = cmisapi_getChildren($repository->repositoryId, $object_id);
+
+  $object_list = $children->objectList;
+
+  foreach($object_list as $key => $value) {
+    $obj_type = $value->properties['cmis:objectTypeId'];
+    if ($obj_type == 'cmis:folder') {
+      $doc_objects[] = $value;
+    }
+  }
+
+  return $doc_objects;
+}
+
+function _gsb_cmis_api_getTopLevelObjects($repository_name, $uuid) {
+
+  module_load_include('api.inc', 'cmis');
+
+  // pull out the object id from the uuid
+  $object_id = _gsb_cmis_api_get_object_id($uuid);
+  if (empty($object_id)) {
+    return;
+  }
+
+  // get the repository and the top level non folder objects 
+  $repository = cmis_get_repository($repository_name);
+  $objects = _gsb_cmis_api_getTopLevelNonFolderObjects($repository, $object_id);
+
+  return $objects;
+}
+
+function _gsb_cmis_api_getTopLevelNonFolderObjects($repository, $object_id) {
+
+  $doc_objects = array();
+
+  $children = cmisapi_getChildren($repository->repositoryId, $object_id);
+
+  $object_list = $children->objectList;
+
+  foreach($object_list as $key => $value) {
+    $obj_type = $value->properties['cmis:objectTypeId'];
+    if ($obj_type != 'cmis:folder') {
+      $doc_objects[] = $value;      
     }
   }
 
